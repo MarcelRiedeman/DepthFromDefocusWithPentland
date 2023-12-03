@@ -31,31 +31,32 @@ def image_to_dft(image_path, new_size=(120, 120)):
     return fourier_transform, magnitude_spectrum
 
 
-def find_proper_u_v(DFT_patch1, DFT_patch2):
-    u, v = 1, 1
+def find_proper_u_v(magnitude_patch1, magnitude_patch2):
+    u, v = 100, 100
     while u < 120:
         while v < 120:
             # Your logic here using DFT_patch1[u, v] and DFT_patch2[u, v]
-            if DFT_patch1[u, v] > 0 and DFT_patch2[u, v] > 0:
+            if np.log(magnitude_patch2[u, v]) > np.log(magnitude_patch1[u, v]):
                 # Your code for the condition when DFT_patch1 and DFT_patch2 satisfy the condition
                 print(u, v)
-                print(DFT_patch1[u, v], DFT_patch2[u, v])
+                print(magnitude_patch1[u, v], magnitude_patch2[u, v])
                 return u, v
             v += 1
         u += 1
         v = 0  # Reset v for the next iteration of the outer loop
 
 
-def depth_from_patch(DFT_patch1, DFT_patch2, D_1, D_2, f, s):
-    u, v = find_proper_u_v(DFT_patch1, DFT_patch2)
+def depth_from_patch(magnitude_patch1, magnitude_patch2, F_1, F_2, f, s):
+    u, v = find_proper_u_v(magnitude_patch1, magnitude_patch2)
 
     # Ensure the logarithms are computed for non-negative values
-    log_DFT_patch1 = np.log(DFT_patch1[u, v])
-    log_DFT_patch2 = np.log(DFT_patch2[u, v])
+    log_mag_patch1 = np.log(magnitude_patch1[u, v])
+    log_mag_patch2 = np.log(magnitude_patch2[u, v])
 
-    sigma_2 = math.sqrt(log_DFT_patch2 - log_DFT_patch1) / (
-            2 * np.pi ** 2 * (u ** 2 + v ** 2) * ((D_1 ** 2 / D_2 ** 2) - 1))
-    depth = s * f / (s - f + 2 * sigma_2 * (f / D_2))
+    sigma_2 = math.sqrt(log_mag_patch2 - log_mag_patch1) / (
+            2 * np.pi ** 2 * (u ** 2 + v ** 2) * (((F_2 / F_1) ** 2) - 1))
+    print("sigma_2: " + str(sigma_2))
+    depth = s * f / (s - f + 2 * sigma_2 * (F_1))
 
     return depth
 
@@ -81,14 +82,14 @@ if __name__ == '__main__':
     plot_image_and_dft(image_patch1_path)
     # Example usage
     new_size = (120, 120)
-    dft_patch1, _ = image_to_dft(image_patch1_path, new_size)
-    dft_patch2, _ = image_to_dft(image_patch2_path, new_size)
+    dft_patch1, mag_patch1 = image_to_dft(image_patch1_path, new_size)
+    dft_patch2, mag_patch2 = image_to_dft(image_patch2_path, new_size)
 
     # Parameters for depth calculation
-    D_1 = 1.0  # Replace with actual values
-    D_2 = 2.0  # Replace with actual values
-    f = 50.0  # Replace with actual values
-    s = 100.0  # Replace with actual values
+    F_1 = 5.6
+    F_2 = 16
+    f = 55.0  # mm
+    s = 61.8  # mm
 
-    calculated_depth = depth_from_patch(dft_patch1, dft_patch2, D_1, D_2, f, s)
+    calculated_depth = depth_from_patch(mag_patch1, mag_patch2, F_1, F_2, f, s)
     print(f"Calculated depth: {calculated_depth}")
