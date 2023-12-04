@@ -5,13 +5,19 @@ import time
 start_time = time.time()
 
 # Load images
-sharp_image = cv2.imread(r"S80CC.png")
-blurred_image = cv2.imread(r'B80CC.png')
+#sharp_image = cv2.imread(r"S80CC.png")
+#blurred_image = cv2.imread(r'B80CC.png')
+blurred_patch = Functions.crop_center_patch_and_save("images/F5.6-50.jpg")
+sharp_patch = Functions.crop_center_patch_and_save("images/F16-80.jpg")
+blurred_image = cv2.imread(r"images/F5.6-50_cropped.jpg")
+sharp_image = cv2.imread(r"images/F16-80_cropped.jpg")
 
 # Convert images to grayscale
 gray_sharp, gray_blurred = Functions.convert_to_grayscale(sharp_image,blurred_image)
 
-# Compute the Discrete Fourier Transform of both images, Shift the zero-frequency component to the center of the spectrum, Calculate the magnitude of the Fourier Transform, Scale the magnitude for display, Calculate difference (natural log) of images
+# Compute the Discrete Fourier Transform of both images, Shift the zero-frequency component to the center of the
+# spectrum, Calculate the magnitude of the Fourier Transform, Scale the magnitude for display, Calculate difference (
+# natural log) of images
 ln_difference, scaled_magnitude_image1, scaled_magnitude_image2 = Functions.DFT_Shifted_Scaled(gray_sharp,gray_blurred)
 
 # Calculate average of max ln difference for top 10 rows and first 10 columns
